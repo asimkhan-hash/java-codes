@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KUTS - Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0A0A0F;
+    --sidebar-bg: #13131F;
+    --card-bg: #1A1A2A;
+    --card-border: rgba(124,107,255,0.12);
+    --input-bg: #22223A;
+    --input-border: #35355A;
+    --text: #E2E2F0;
+    --text-muted: #7A7A9A;
+    --accent: #7C6BFF;
+    --accent-glow: rgba(124,107,255,0.25);
+    --accent2: #C084FC;
+    --success: #34D399;
+    --sidebar-w: 250px;
+    --transition: 0.22s cubic-bezier(.4,0,.2,1);
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--sidebar-bg);
+    border-right: 1px solid rgba(124,107,255,0.08);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-brand {
+    padding: 28px 24px 24px;
+    border-bottom: 1px solid rgba(124,107,255,0.08);
+  }
+  .brand-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 5px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .brand-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.1;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .brand-name span {
+    display: block;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 10px 12px 6px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all var(--transition);
+    cursor: pointer;
+    border: 1px solid transparent;
+    position: relative;
+    letter-spacing: 0.01em;
+  }
+  .nav-link:hover {
+    color: var(--text);
+    background: rgba(124,107,255,0.07);
+    border-color: rgba(124,107,255,0.12);
+  }
+  .nav-link.active {
+    color: #fff;
+    background: rgba(124,107,255,0.14);
+    border-color: rgba(124,107,255,0.22);
+    box-shadow: 0 0 20px rgba(124,107,255,0.08);
+  }
+  .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 6px; bottom: 6px;
+    width: 3px;
+    background: linear-gradient(180deg, var(--accent), var(--accent2));
+    border-radius: 0 4px 4px 0;
+  }
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.75;
+  }
+  .nav-link.active .nav-icon { opacity: 1; }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(124,107,255,0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sidebar-avatar-small {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .sidebar-user-info { flex: 1; min-width: 0; }
+  .sidebar-user-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sidebar-user-id {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* background orbs */
+  .main::before {
+    content: '';
+    position: fixed;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,107,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .main::after {
+    content: '';
+    position: fixed;
+    bottom: -200px; left: 200px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,132,252,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .main-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  /* ── TOP HEADER ── */
+  .page-header {
+    margin-bottom: 36px;
+    animation: fadeUp 0.5s both;
+  }
+  .page-header-sub {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .page-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #fff;
+  }
+  .page-header h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, #a78bfa, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .page-header p {
+    margin-top: 6px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  /* ── PROFILE CARD ── */
+  .profile-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(124,107,255,0.12), 0 20px 60px rgba(0,0,0,0.5);
+    overflow: hidden;
+    animation: fadeUp 0.5s 0.1s both;
+  }
+
+  .card-header-band {
+    height: 8px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%);
+  }
+
+  .card-body {
+    padding: 36px 40px;
+  }
+
+  /* ── AVATAR SECTION ── */
+  .avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 36px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid rgba(124,107,255,0.1);
+  }
+  .avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .avatar-circle {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2D2D50 0%, #1E1E38 100%);
+    border: 2.5px solid rgba(124,107,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--accent);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 24px rgba(124,107,255,0.2);
+    transition: border-color var(--transition);
+  }
+  .avatar-circle img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: none;
+    border-radius: 50%;
+  }
+  .avatar-edit-btn {
+    position: absolute;
+    bottom: 2px; right: 2px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--card-bg);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: 0 2px 8px rgba(124,107,255,0.4);
+  }
+  .avatar-edit-btn:hover { background: var(--accent2); transform: scale(1.1); }
+  .avatar-edit-btn svg { width: 11px; height: 11px; stroke: #fff; }
+  #avatar-upload { display: none; }
+
+  .avatar-meta { flex: 1; }
+  .avatar-meta-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .avatar-meta-id {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(52,211,153,0.12);
+    border: 1px solid rgba(52,211,153,0.3);
+    color: var(--success);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 100px;
+    letter-spacing: 0.04em;
+  }
+  .verified-badge .check-icon { font-size: 13px; }
+
+  /* ── FIELDS GRID ── */
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 28px;
+  }
+  .field-full { grid-column: 1 / -1; }
+
+  .field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .field-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    padding: 0 12px;
+    height: 44px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  .field-control:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,107,255,0.15);
+  }
+  .field-control.readonly {
+    background: rgba(34,34,58,0.5);
+    border-color: transparent;
+  }
+  .field-control.readonly:focus-within {
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  .field-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+    caret-color: var(--accent);
+  }
+  .field-input::placeholder { color: #555570; }
+  .field-input:disabled {
+    color: var(--text);
+    cursor: default;
+    -webkit-text-fill-color: var(--text);
+    opacity: 1;
+  }
+
+  select.field-input {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  select.field-input:disabled { cursor: default; }
+
+  .field-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .pencil-btn {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: transparent;
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all var(--transition);
+    flex-shrink: 0;
+  }
+  .pencil-btn:hover {
+    background: rgba(124,107,255,0.15);
+    color: var(--accent);
+  }
+  .pencil-btn svg { width: 14px; height: 14px; }
+
+  .save-btn {
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 7px;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    transition: all var(--transition);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .save-btn:hover {
+    background: var(--accent2);
+    box-shadow: 0 4px 14px rgba(124,107,255,0.4);
+  }
+  .save-btn.visible { display: flex; }
+
+  /* select arrow overlay */
+  .select-wrap {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+  .select-arrow {
+    position: absolute;
+    right: 0;
+    pointer-events: none;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+  }
+  .select-arrow svg { width: 14px; height: 14px; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── MOBILE HAMBURGER ── */
+  .hamburger {
+    display: none;
+    position: fixed;
+    top: 16px; left: 16px;
+    z-index: 200;
+    width: 40px; height: 40px;
+    background: var(--card-bg);
+    border: 1px solid rgba(124,107,255,0.2);
+    border-radius: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .hamburger span {
+    display: block;
+    width: 18px; height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: all var(--transition);
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 90;
+    backdrop-filter: blur(2px);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform var(--transition);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.open { display: block; }
+    .hamburger { display: flex; }
+    .main { margin-left: 0; }
+    .main-inner { padding: 72px 16px 60px; }
+    .card-body { padding: 24px 20px; }
+    .fields-grid { grid-template-columns: 1fr; gap: 16px; }
+    .field-full { grid-column: 1; }
+    .avatar-section { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .page-header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar overlay -->
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- Hamburger -->
+<div class="hamburger" id="hamburger" onclick="toggleSidebar()">
+  <span></span><span></span><span></span>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-tag">Student Marketplace</div>
+    <div class="brand-name">KUTS</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Menu</div>
+
+    <a class="nav-link active" href="#">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+          <rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/>
+          <rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/>
+        </svg>
+      </span>
+      Dashboard
+    </a>
+
+    <a class="nav-link" href="#">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M4 4h12v10a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/>
+          <path d="M8 4V2h4v2"/><path d="M8 9h4M8 12h2"/>
+        </svg>
+      </span>
+      My Listings
+    </a>
+
+    <a class="nav-link" href="#">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M3 5h14M3 10h14M3 15h8"/>
+          <circle cx="16" cy="15" r="2.5"/>
+        </svg>
+      </span>
+      Purchase History
+    </a>
+
+    <a class="nav-link" href="#">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M3 4h14a1 1 0 011 1v8a1 1 0 01-1 1H5l-3 3V5a1 1 0 011-1z"/>
+        </svg>
+      </span>
+      Messages
+    </a>
+
+    <a class="nav-link" href="#">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="10" cy="7" r="3"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6"/>
+        </svg>
+      </span>
+      Account Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-avatar-small">CS</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name">2024/CS/123</div>
+      <div class="sidebar-user-id">Student</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+  <div class="main-inner">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-sub">Student Profile</div>
+      <h1>Welcome back, <em>2024/CS/123</em></h1>
+      <p>Manage your profile information and account details below.</p>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="card-header-band"></div>
+      <div class="card-body">
+
+        <!-- Avatar + Meta -->
+        <div class="avatar-section">
+          <div class="avatar-wrap">
+            <div class="avatar-circle" id="avatarCircle">
+              <span id="avatarInitials">CS</span>
+              <img id="avatarImg" src="" alt="Profile"/>
+            </div>
+            <div class="avatar-edit-btn" onclick="document.getElementById('avatar-upload').click()" title="Change photo">
+              <svg viewBox="0 0 14 14" fill="none" stroke-width="1.8" stroke="currentColor">
+                <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/>
+              </svg>
+            </div>
+            <input type="file" id="avatar-upload" accept="image/*" onchange="handleAvatarChange(event)"/>
+          </div>
+          <div class="avatar-meta">
+            <div class="avatar-meta-name" id="displayName">Computer Science</div>
+            <div class="avatar-meta-id">2024/CS/123 · KU Student</div>
+            <div class="verified-badge">
+              <span class="check-icon">✓</span> Verified Student
+            </div>
+          </div>
+        </div>
+
+        <!-- Fields Grid -->
+        <div class="fields-grid">
+
+          <!-- Full Name -->
+          <div class="field-row field-full">
+            <div class="field-label">Full Name</div>
+            <div class="field-control readonly" id="ctrl-name">
+              <input class="field-input" id="inp-name" type="text" value="Ali Hassan Khan" disabled placeholder="Enter full name"/>
+              <div class="field-actions">
+                <button class="pencil-btn" onclick="editField('name')" title="Edit">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/>
+                  </svg>
+                </button>
+                <button class="save-btn" id="save-name" onclick="saveField('name')">Save</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="field-row field-full">
+            <div class="field-label">Email Address</div>
+            <div class="field-control readonly" id="ctrl-email">
+              <input class="field-input" id="inp-email" type="email" value="ali.hassan@ku.edu.pk" disabled placeholder="Enter email"/>
+              <div class="field-actions">
+                <button class="pencil-btn" onclick="editField('email')" title="Edit">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/>
+                  </svg>
+                </button>
+                <button class="save-btn" id="save-email" onclick="saveField('email')">Save</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seat Number -->
+          <div class="field-row">
+            <div class="field-label">Seat Number</div>
+            <div class="field-control readonly" id="ctrl-seat">
+              <input class="field-input" id="inp-seat" type="text" value="2024/CS/123" disabled placeholder="e.g. 2024/CS/123"/>
+              <div class="field-actions">
+                <button class="pencil-btn" onclick="editField('seat')" title="Edit">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/>
+                  </svg>
+                </button>
+                <button class="save-btn" id="save-seat" onclick="saveField('seat')">Save</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="field-row">
+            <div class="field-label">Phone Number</div>
+            <div class="field-control readonly" id="ctrl-phone">
+              <input class="field-input" id="inp-phone" type="tel" value="+92 300 1234567" disabled placeholder="+92 XXX XXXXXXX"/>
+              <div class="field-actions">
+                <button class="pencil-btn" onclick="editField('phone')" title="Edit">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/>
+                  </svg>
+                </button>
+                <button class="save-btn" id="save-phone" onclick="saveField('phone')">Save</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Year -->
+          <div class="field-row">
+            <div class="field-label">Year</div>
+            <div class="field-control readonly" id="ctrl-year">
+              <div class="select-wrap">
+                <select class="field-input" id="inp-year" disabled>
+                  <option value="1">1st Year</option>
+                  <option value="2" selected>2nd Year</option>
+                  <option value="3">3rd Year</option>
+                  <option value="4">4th Year</option>
+                </select>
+                <span class="select-arrow">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M3 5l4 4 4-4"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="field-actions">
+                <button class="pencil-btn" onclick="editField('year')" title="Edit">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/>
+                  </svg>
+                </button>
+                <button class="save-btn" id="save-year" onclick="saveField('year')">Save</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Semester -->
+          <div class="field-row">
+            <div class="field-label">Semester</div>
+            <div class="field-control readonly" id="ctrl-semester">
+              <div class="select-wrap">
+                <select class="field-input" id="inp-semester" disabled>
+                  <option value="1">1st Semester</option>
+                  <option value="2">2nd Semester</option>
+                  <option value="3">3rd Semester</option>
+                  <option value="4" selected>4th Semester</option>
+                  <option value="5">5th Semester</option>
+                  <option value="6">6th Semester</option>
+                  <option value="7">7th Semester</option>
+                  <option value="8">8th Semester</option>
+                </select>
+                <span class="select-arrow">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M3 5l4 4 4-4"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="field-actions">
+                <button class="pencil-btn" onclick="editField('semester')" title="Edit">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/>
+                  </svg>
+                </button>
+                <button class="save-btn" id="save-semester" onclick="saveField('semester')">Save</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Department -->
+          <div class="field-row field-full">
+            <div class="field-label">Department</div>
+            <div class="field-control readonly" id="ctrl-dept">
+              <div class="select-wrap">
+                <select class="field-input" id="inp-dept" disabled>
+                  <option value="cs" selected>Computer Science</option>
+                  <option value="se">Software Engineering</option>
+                  <option value="ee">Electrical Engineering</option>
+                  <option value="ba">Business Administration</option>
+                  <option value="eco">Economics</option>
+                </select>
+                <span class="select-arrow">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M3 5l4 4 4-4"/>
+                  </svg>
+                </span>
+              </div>
+              <div class="field-actions">
+                <button class="pencil-btn" onclick="editField('dept')" title="Edit">
+                  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/>
+                  </svg>
+                </button>
+                <button class="save-btn" id="save-dept" onclick="saveField('dept')">Save</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /fields-grid -->
+      </div><!-- /card-body -->
+    </div><!-- /profile-card -->
+
+  </div>
+</main>
+
+<script>
+  // Sidebar mobile toggle
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  }
+
+  // Avatar upload
+  function handleAvatarChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const img = document.getElementById('avatarImg');
+      const initials = document.getElementById('avatarInitials');
+      img.src = ev.target.result;
+      img.style.display = 'block';
+      initials.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Edit field
+  function editField(id) {
+    const ctrl = document.getElementById('ctrl-' + id);
+    const inp  = document.getElementById('inp-' + id);
+    const saveBtn = document.getElementById('save-' + id);
+
+    ctrl.classList.remove('readonly');
+    inp.disabled = false;
+    inp.focus();
+    saveBtn.classList.add('visible');
+  }
+
+  // Save field
+  function saveField(id) {
+    const ctrl = document.getElementById('ctrl-' + id);
+    const inp  = document.getElementById('inp-' + id);
+    const saveBtn = document.getElementById('save-' + id);
+
+    inp.disabled = true;
+    ctrl.classList.add('readonly');
+    saveBtn.classList.remove('visible');
+
+    // Update sidebar display name if name field saved
+    if (id === 'name') {
+      document.getElementById('displayName').textContent = inp.value || 'Student';
+      // Update initials
+      const parts = inp.value.trim().split(' ');
+      const initials = parts.map(p => p[0]).join('').toUpperCase().slice(0,2);
+      document.getElementById('avatarInitials').textContent = initials || 'ST';
+    }
+
+    // Flash success
+    ctrl.style.transition = 'border-color 0.2s';
+    ctrl.style.borderColor = 'rgba(52,211,153,0.5)';
+    setTimeout(() => { ctrl.style.borderColor = ''; }, 900);
+  }
+
+  // Nav link active state (cosmetic for SPA feel)
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+      closeSidebar();
+    });
+  });
+</script>
+</body>
+</html>
